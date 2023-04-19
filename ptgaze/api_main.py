@@ -12,6 +12,7 @@ from ptgaze.utils import (check_path_all, download_dlib_pretrained_model,
                     download_ethxgaze_model, download_mpiifacegaze_model,
                     download_mpiigaze_model, expanduser_all,
                     generate_dummy_camera_params)
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--debug', action='store_true')
     return parser.parse_args()
 
+def gaze_vector_to_angle(vector: np.ndarray) -> np.ndarray:
+    assert vector.shape == (3, )
+    x, y, z = vector
+    pitch = np.arcsin(-y)
+    yaw = np.arctan2(-x, -z)
+    return np.array([pitch, yaw])
 
 if __name__ == '__main__':
     args = parse_args()
@@ -61,6 +68,11 @@ if __name__ == '__main__':
 
     check_path_all(config)
     api = APIGaze(config)
-    
+
     image = cv2.imread(args.input_path)
-    api.run(image)
+    
+    return_det = api.run(image)
+    # print(return_det)
+    for return_face in return_det:
+        gaze_angle = gaze_vector_to_angle(return_face["gaze_vector"])
+        print(gaze_angle, np.rad2deg(gaze_angle))

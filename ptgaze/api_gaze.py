@@ -32,11 +32,12 @@ class APIGaze:
         self.show_normalized_image = self.config.demo.show_normalized_image
         self.show_template_model = self.config.demo.show_template_model
 
-    def run(self, image) -> None:
-            self._run_on_image(image)
+    def run(self, image) -> list:
+        return_det = self._run_on_image(image)
+        return return_det
 
     def _run_on_image(self, image):
-        self._process_image(image)
+        return_det = self._process_image(image)
         if self.config.demo.display_on_screen:
             while True:
                 key_pressed = self._wait_key()
@@ -45,14 +46,16 @@ class APIGaze:
                 if key_pressed:
                     self._process_image(image)
                 cv2.imshow('image', self.visualizer.image)
-
-    def _process_image(self, image) -> None:
+        return return_det
+    
+    def _process_image(self, image) -> list:
         undistorted = cv2.undistort(
             image, self.gaze_estimator.camera.camera_matrix,
             self.gaze_estimator.camera.dist_coefficients)
 
         self.visualizer.set_image(image.copy())
         faces = self.gaze_estimator.detect_faces(undistorted)
+        return_det = []
         for face in faces:
             self.gaze_estimator.estimate_gaze(undistorted, face)
             self._draw_face_bbox(face)
@@ -61,7 +64,14 @@ class APIGaze:
             self._draw_face_template_model(face)
             self._draw_gaze_vector(face)
             self._display_normalized_image(face)
-
+            face_det = {}
+            face_det["bbox"] = face.bbox
+            # face_det["landmarks"] = face.landmarks
+            face_det["gaze_vector"] = face.gaze_vector
+            face_det["head_pos"] = face.head_position
+            return_det.append(face_det)
+        return return_det
+    
     def _wait_key(self) -> bool:
         key = cv2.waitKey(self.config.demo.wait_time) & 0xff
         if key in self.QUIT_KEYS:

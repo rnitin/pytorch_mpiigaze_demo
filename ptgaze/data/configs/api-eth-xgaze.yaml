@@ -16,7 +16,7 @@ gaze_estimator:
 demo:
   use_camera: false
   display_on_screen: true
-  wait_time: 10
+  wait_time: 1000
   image_path: null
   video_path: null
   output_dir: null
