@@ -14,6 +14,7 @@ from .utils import (check_path_all, download_dlib_pretrained_model,
 
 logger = logging.getLogger(__name__)
 
+from .estimate_gaze import EstimateGaze
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
@@ -151,5 +152,7 @@ def main():
 
     check_path_all(config)
 
-    demo = Demo(config)
-    demo.run()
+    estimgaze = EstimateGaze(config)
+    estimgaze.run()
+    # demo = Demo(config)
+    # demo.run()
