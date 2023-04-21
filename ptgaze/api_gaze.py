@@ -39,13 +39,8 @@ class APIGaze:
     def _run_on_image(self, image):
         return_det = self._process_image(image)
         if self.config.demo.display_on_screen:
-            while True:
-                key_pressed = self._wait_key()
-                if self.stop:
-                    break
-                if key_pressed:
-                    self._process_image(image)
-                cv2.imshow('image', self.visualizer.image)
+            cv2.imshow('computed gaze', self.visualizer.image)
+            cv2.waitKey(1)
         return return_det
     
     def _process_image(self, image) -> list:
@@ -72,24 +67,6 @@ class APIGaze:
             return_det.append(face_det)
         return return_det
     
-    def _wait_key(self) -> bool:
-        key = cv2.waitKey(self.config.demo.wait_time) & 0xff
-        if key in self.QUIT_KEYS:
-            self.stop = True
-        elif key == ord('b'):
-            self.show_bbox = not self.show_bbox
-        elif key == ord('l'):
-            self.show_landmarks = not self.show_landmarks
-        elif key == ord('h'):
-            self.show_head_pose = not self.show_head_pose
-        elif key == ord('n'):
-            self.show_normalized_image = not self.show_normalized_image
-        elif key == ord('t'):
-            self.show_template_model = not self.show_template_model
-        else:
-            return False
-        return True
-
     def _draw_face_bbox(self, face: Face) -> None:
         if not self.show_bbox:
             return
